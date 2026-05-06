@@ -16,10 +16,24 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     body: options.body ? JSON.stringify(options.body) : undefined,
   });
 
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(text || 'Request failed');
+  let data: unknown = null;
+  try {
+    data = await response.json();
+  } catch {
+    data = null;
   }
 
-  return (await response.json()) as T;
+  if (!response.ok) {
+    if (
+      data &&
+      typeof data === 'object' &&
+      'message' in data &&
+      typeof (data as { message: unknown }).message === 'string'
+    ) {
+      throw new Error((data as { message: string }).message);
+    }
+    throw new Error('Request failed. Please try again.');
+  }
+
+  return data as T;
 }
