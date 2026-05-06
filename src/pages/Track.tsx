@@ -1,7 +1,12 @@
 import { MapPin, Check, ChefHat, Bike, Home as HomeIcon, Star, Phone } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
+import { useAppState } from '../context/AppState';
 
 export const Track = () => {
+    const [params] = useSearchParams();
+    const { orders } = useAppState();
+    const orderId = params.get('orderId') ?? orders[0]?.id ?? 'N/A';
+
     return (
         <div className="bg-background text-on-background min-h-screen flex flex-col relative pb-8 pt-16">
             <header className="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 h-16 bg-surface-container-lowest border-b border-surface-container-high shadow-sm">
@@ -33,7 +38,7 @@ export const Track = () => {
                     <div className="text-center">
                         <p className="font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wide mb-unit">Estimated Arrival</p>
                         <h1 className="font-h1 text-h1 text-on-surface">20 - 25 Min</h1>
-                        <p className="font-body-md text-body-md text-on-surface-variant mt-unit">Arriving at 19:45</p>
+                        <p className="font-body-md text-body-md text-on-surface-variant mt-unit">Arriving soon</p>
                     </div>
 
                     <div className="bg-surface p-stack-md rounded-xl border border-surface-container-high shadow-sm">
@@ -109,7 +114,7 @@ export const Track = () => {
                     </div>
 
                     <div className="mt-stack-sm text-center">
-                        <p className="font-body-md text-body-md text-on-surface-variant">Order #AB-9824 • Jollof Express</p>
+                        <p className="font-body-md text-body-md text-on-surface-variant">Order #{orderId} • AfroBite</p>
                     </div>
                 </div>
             </main>

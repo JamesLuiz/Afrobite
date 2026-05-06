@@ -1,9 +1,31 @@
 import { Mail, Lock, EyeOff, ArrowRight, User } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useState, type FormEvent } from 'react';
+import { useAppState } from '../context/AppState';
 
 export const Login = () => {
+    const navigate = useNavigate();
+    const { login, register, loading } = useAppState();
     const [isLogin, setIsLogin] = useState(true);
+    const [fullName, setFullName] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+
+    const onSubmit = async (event: FormEvent) => {
+        event.preventDefault();
+        setError('');
+        try {
+            if (isLogin) {
+                await login(email, password);
+            } else {
+                await register(fullName, email, password);
+            }
+            navigate('/nearby');
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Authentication failed');
+        }
+    };
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen py-section-gap px-container-padding bg-background">
@@ -33,13 +55,13 @@ export const Login = () => {
                     </div>
                 </div>
 
-                <form className="p-container-padding flex flex-col gap-stack-md">
+                <form className="p-container-padding flex flex-col gap-stack-md" onSubmit={onSubmit}>
                     {!isLogin && (
                         <div className="flex flex-col gap-stack-sm">
                             <label className="font-label-bold text-label-bold text-on-surface" htmlFor="name">Full Name</label>
                             <div className="relative">
                                 <User className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant w-5 h-5 pointer-events-none" />
-                                <input type="text" id="name" className="w-full pl-10 pr-4 py-3 bg-surface-container-low border border-outline-variant rounded-DEFAULT font-body-md text-body-md text-on-background focus:border-primary outline-none transition-colors placeholder:text-on-surface-variant/50" placeholder="Enter your full name" />
+                                <input value={fullName} onChange={(e) => setFullName(e.target.value)} type="text" id="name" className="w-full pl-10 pr-4 py-3 bg-surface-container-low border border-outline-variant rounded-DEFAULT font-body-md text-body-md text-on-background focus:border-primary outline-none transition-colors placeholder:text-on-surface-variant/50" placeholder="Enter your full name" required={!isLogin} />
                             </div>
                         </div>
                     )}
@@ -48,7 +70,7 @@ export const Login = () => {
                         <label className="font-label-bold text-label-bold text-on-surface" htmlFor="email">Email Address</label>
                         <div className="relative">
                             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant w-5 h-5 pointer-events-none" />
-                            <input type="email" id="email" className="w-full pl-10 pr-4 py-3 bg-surface-container-low border border-outline-variant rounded-DEFAULT font-body-md text-body-md text-on-background focus:border-primary outline-none transition-colors placeholder:text-on-surface-variant/50" placeholder="Enter your email" />
+                            <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" id="email" className="w-full pl-10 pr-4 py-3 bg-surface-container-low border border-outline-variant rounded-DEFAULT font-body-md text-body-md text-on-background focus:border-primary outline-none transition-colors placeholder:text-on-surface-variant/50" placeholder="Enter your email" required />
                         </div>
                     </div>
 
@@ -59,16 +81,18 @@ export const Login = () => {
                         </div>
                         <div className="relative">
                             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant w-5 h-5 pointer-events-none" />
-                            <input type="password" id="password" className="w-full pl-10 pr-10 py-3 bg-surface-container-low border border-outline-variant rounded-DEFAULT font-body-md text-body-md text-on-background focus:border-primary outline-none transition-colors placeholder:text-on-surface-variant/50" placeholder="••••••••" />
+                            <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" id="password" className="w-full pl-10 pr-10 py-3 bg-surface-container-low border border-outline-variant rounded-DEFAULT font-body-md text-body-md text-on-background focus:border-primary outline-none transition-colors placeholder:text-on-surface-variant/50" placeholder="••••••••" required />
                             <button type="button" className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-background">
                                 <EyeOff className="w-5 h-5" />
                             </button>
                         </div>
                     </div>
 
-                    <Link to="/" className="w-full mt-stack-sm py-3 bg-primary hover:bg-primary-container text-on-primary font-label-bold text-label-bold rounded-DEFAULT shadow-sm transition-all active:scale-95 flex items-center justify-center gap-2 min-h-[48px]">
+                    {error && <p className="text-error text-sm">{error}</p>}
+
+                    <button type="submit" disabled={loading} className="w-full mt-stack-sm py-3 bg-primary hover:bg-primary-container text-on-primary font-label-bold text-label-bold rounded-DEFAULT shadow-sm transition-all active:scale-95 flex items-center justify-center gap-2 min-h-[48px] disabled:opacity-60">
                         {isLogin ? 'Sign In' : 'Create Account'} <ArrowRight className="w-5 h-5" />
-                    </Link>
+                    </button>
 
                     <div className="relative flex items-center py-stack-md">
                         <div className="flex-grow border-t border-surface-container-highest"></div>

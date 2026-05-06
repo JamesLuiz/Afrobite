@@ -1,7 +1,31 @@
 import { ArrowLeft, Clock, MapPin, CreditCard, Lock } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { useAppState } from '../context/AppState';
 
 export const Checkout = () => {
+    const navigate = useNavigate();
+    const { cart, cartSubtotal, selectedRestaurant, checkout, user } = useAppState();
+    const [address, setAddress] = useState('123 Brick Lane, Spitalfields E1 6AN');
+    const [notes, setNotes] = useState('');
+    const [error, setError] = useState('');
+    const deliveryFee = selectedRestaurant?.deliveryFee ?? 0;
+    const serviceFee = 1;
+    const total = cartSubtotal + deliveryFee + serviceFee;
+
+    const onPlaceOrder = async () => {
+        setError('');
+        if (!user) {
+            navigate('/login');
+            return;
+        }
+        try {
+            const orderId = await checkout(address, notes);
+            navigate(`/track?orderId=${orderId}`);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Checkout failed');
+        }
+    };
     return (
         <div className="bg-background text-on-background font-body-md pt-[80px] pb-[100px] md:pb-[40px] px-container-padding min-h-screen">
             <header className="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 h-16 bg-surface-container-lowest border-b border-surface-variant shadow-[0px_4px_20px_rgba(0,0,0,0.05)]">
@@ -50,16 +74,16 @@ export const Checkout = () => {
                             <div className="flex flex-col md:flex-row gap-4">
                                 <div className="flex-1 relative">
                                     <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 text-on-surface-variant w-5 h-5" />
-                                    <input type="text" className="w-full pl-12 pr-4 py-3 bg-surface-container-low border border-surface-container-highest rounded-lg font-body-md text-on-background outline-none focus:border-primary" defaultValue="123 Brick Lane, Spitalfields" />
+                                    <input value={address} onChange={(e) => setAddress(e.target.value)} type="text" className="w-full pl-12 pr-4 py-3 bg-surface-container-low border border-surface-container-highest rounded-lg font-body-md text-on-background outline-none focus:border-primary" />
                                 </div>
                                 <div className="w-full md:w-1/3 relative">
-                                    <input type="text" className="w-full px-4 py-3 bg-surface-container-low border border-surface-container-highest rounded-lg font-body-md text-on-background outline-none focus:border-primary" defaultValue="E1 6AN" />
+                                    <input type="text" className="w-full px-4 py-3 bg-surface-container-low border border-surface-container-highest rounded-lg font-body-md text-on-background outline-none focus:border-primary" defaultValue="E1 6AN" readOnly />
                                 </div>
                             </div>
                         </div>
                         <div className="flex flex-col gap-2">
                             <label className="font-label-bold text-on-surface-variant">Delivery Instructions (Optional)</label>
-                            <textarea className="w-full px-4 py-3 bg-surface-container-low border border-surface-container-highest rounded-lg font-body-md text-on-background outline-none focus:border-primary resize-none h-[80px]" placeholder="e.g. Leave at reception"></textarea>
+                            <textarea value={notes} onChange={(e) => setNotes(e.target.value)} className="w-full px-4 py-3 bg-surface-container-low border border-surface-container-highest rounded-lg font-body-md text-on-background outline-none focus:border-primary resize-none h-[80px]" placeholder="e.g. Leave at reception"></textarea>
                         </div>
                     </section>
 
@@ -139,18 +163,19 @@ export const Checkout = () => {
                         <div className="h-px bg-surface-container-highest w-full my-2"></div>
 
                         <div className="flex flex-col gap-2 font-body-md">
-                            <div className="flex justify-between text-on-surface-variant"><span>Subtotal</span><span>£26.50</span></div>
-                            <div className="flex justify-between text-on-surface-variant"><span>Delivery Fee</span><span>£2.50</span></div>
-                            <div className="flex justify-between text-on-surface-variant"><span>Service Fee</span><span>£1.00</span></div>
+                            <div className="flex justify-between text-on-surface-variant"><span>Subtotal</span><span>£{cartSubtotal.toFixed(2)}</span></div>
+                            <div className="flex justify-between text-on-surface-variant"><span>Delivery Fee</span><span>£{deliveryFee.toFixed(2)}</span></div>
+                            <div className="flex justify-between text-on-surface-variant"><span>Service Fee</span><span>£{serviceFee.toFixed(2)}</span></div>
                             <div className="flex justify-between items-center mt-4 pt-4 border-t border-surface-container-highest">
                                 <span className="font-h3 text-h3 text-on-background">Total</span>
-                                <span className="font-h3 text-h3 text-primary">£30.00</span>
+                                <span className="font-h3 text-h3 text-primary">£{total.toFixed(2)}</span>
                             </div>
                         </div>
 
-                        <Link to="/track" className="w-full mt-6 bg-primary text-on-primary font-label-bold py-4 rounded-lg shadow-sm hover:opacity-90 active:scale-[0.98] transition-all flex justify-center items-center gap-2">
-                            <Lock className="w-5 h-5" /> Place Order • £30.00
-                        </Link>
+                        {error && <p className="text-error text-sm">{error}</p>}
+                        <button onClick={onPlaceOrder} className="w-full mt-6 bg-primary text-on-primary font-label-bold py-4 rounded-lg shadow-sm hover:opacity-90 active:scale-[0.98] transition-all flex justify-center items-center gap-2">
+                            <Lock className="w-5 h-5" /> Place Order • £{total.toFixed(2)}
+                        </button>
                         <p className="font-label-sm text-center text-on-surface-variant mt-2">By placing this order, you agree to our Terms & Conditions.</p>
                     </section>
                 </div>

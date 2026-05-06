@@ -1,9 +1,16 @@
 import { ArrowLeft, Star, Flame, Utensils, PlusCircle, Minus, Plus, ShoppingCart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
+import { useAppState } from '../context/AppState';
 
 export const Product = () => {
+    const { menu, addToCart } = useAppState();
     const [qty, setQty] = useState(1);
+    const product = menu[0];
+
+    if (!product) {
+        return <div className="p-8">Select a restaurant first.</div>;
+    }
     
     return (
         <div className="bg-background text-on-background font-body-md text-body-md antialiased pb-32 min-h-screen">
@@ -18,20 +25,20 @@ export const Product = () => {
 
             <main className="max-w-[1200px] mx-auto">
                 <section className="relative w-full h-[350px] md:h-[450px]">
-                    <img alt="Beef Suya" className="w-full h-full object-cover" src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=1200&q=80" />
+                    <img alt={product.name} className="w-full h-full object-cover" src={product.imageUrl} />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
                 </section>
 
                 <section className="px-container-padding py-stack-lg md:px-12 bg-surface rounded-t-[32px] -mt-8 relative z-10 shadow-[0px_-4px_20px_rgba(0,0,0,0.05)]">
                     <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-stack-md mb-stack-lg">
                         <div>
-                            <h1 className="font-h1 text-h1 text-on-surface mb-stack-sm leading-tight">Authentic Beef Suya</h1>
+                            <h1 className="font-h1 text-h1 text-on-surface mb-stack-sm leading-tight">{product.name}</h1>
                             <p className="font-body-lg text-body-lg text-on-surface-variant max-w-2xl text-balance">
-                                Thinly sliced premium beef, marinated in our signature Yaji spice blend—a fiery mix of roasted peanuts, ginger, garlic, and dried chili peppers. Grilled over an open flame to achieve the perfect smoky char.
+                                {product.description}
                             </p>
                         </div>
                         <div className="flex flex-col items-start md:items-end">
-                            <span className="font-h2 text-h2 text-primary">£14.50</span>
+                            <span className="font-h2 text-h2 text-primary">£{product.price.toFixed(2)}</span>
                             <div className="flex items-center gap-unit mt-unit">
                                 <Star className="text-secondary w-5 h-5" fill="currentColor" />
                                 <span className="font-label-bold text-label-bold text-on-surface">4.9</span>
@@ -115,8 +122,8 @@ export const Product = () => {
                             <Plus className="w-5 h-5" />
                         </button>
                     </div>
-                    <Link to="/cart" className="bg-primary hover:bg-primary-container text-on-primary font-label-bold text-label-bold px-stack-lg py-stack-md rounded-lg flex items-center gap-unit transition-colors">
-                        <ShoppingCart className="w-5 h-5" /> Add - £{(14.5 * qty).toFixed(2)}
+                    <Link onClick={() => addToCart(product, qty)} to="/cart" className="bg-primary hover:bg-primary-container text-on-primary font-label-bold text-label-bold px-stack-lg py-stack-md rounded-lg flex items-center gap-unit transition-colors">
+                        <ShoppingCart className="w-5 h-5" /> Add - £{(product.price * qty).toFixed(2)}
                     </Link>
                 </div>
             </div>

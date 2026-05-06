@@ -8,12 +8,12 @@ The backend will be built using a **Modular Monolith** approach with **NestJS**,
 
 **Core Technologies:**
 - Framework: NestJS (TypeScript)
-- Database: PostgreSQL (Relational data: Users, Orders, Restaurants)
-- ORM: TypeORM or Prisma
+- Database: mongodb (Relational data: Users, Orders, Restaurants)
+
 - Caching/PubSub: Redis (for caching menu items, managing order state events)
 - Authentication: JWT-based Auth (with potential integration with Firebase Auth or Auth0)
 - Payment Gateway: Stripe integration
-- Storage: AWS S3 or Google Cloud Storage (for images)
+- Storage: cloudinary
 
 ## 2. Module Structure
 
